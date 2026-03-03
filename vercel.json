@@ -1,0 +1,6 @@
+{
+  "buildCommand": "npm run build -- --filter=@tasman-transport/web",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "outputDirectory": "apps/web/.next"
+}

@@ -1,0 +1,59 @@
+{
+  "expo": {
+    "name": "Tasman Transport",
+    "slug": "tasman-transport",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "tasman-transport",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#1a365d"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.tasmantransport.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "We need your location to track deliveries.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "We need your location to track deliveries in the background.",
+        "NSCameraUsageDescription": "We need camera access to take photos of goods.",
+        "NSPhotoLibraryUsageDescription": "We need photo library access to upload photos of goods."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1a365d"
+      },
+      "package": "com.tasmantransport.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "CAMERA"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Tasman Transport to use your location for delivery tracking."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Tasman Transport to access your camera for taking photos of goods."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Tasman Transport to access your photos for uploading images of goods."
+        }
+      ]
+    ]
+  }
+}
