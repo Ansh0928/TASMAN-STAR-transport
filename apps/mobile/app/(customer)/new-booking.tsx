@@ -16,6 +16,7 @@ import {
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../src/providers/AuthProvider';
+import PlacesAutocompleteInput from '../../src/components/PlacesAutocompleteInput';
 import { supabase } from '../../src/lib/supabase';
 import {
   type Route,
@@ -169,6 +170,8 @@ export default function NewBookingScreen() {
   const [weightKg, setWeightKg] = useState('');
   const [pickupAddress, setPickupAddress] = useState('');
   const [dropoffAddress, setDropoffAddress] = useState('');
+  const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [dropoffCoords, setDropoffCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [pickupDate, setPickupDate] = useState<Date | null>(null);
   const [pickupTime, setPickupTime] = useState<string>('');
   const [lengthCm, setLengthCm] = useState('');
@@ -349,7 +352,10 @@ export default function NewBookingScreen() {
     dropoffDate.setDate(dropoffDate.getDate() + 1);
     const dropoffDatetime = toISOWithOffset(dropoffDate, pickupTime);
 
-    const routeId = routes[0]?.id;
+    const matchedRoute = routes.find(
+      (r) => r.origin === currentRoute.origin && r.destination === currentRoute.destination
+    );
+    const routeId = matchedRoute?.id ?? routes[0]?.id;
     if (!routeId) {
       Alert.alert('Error', 'No routes configured. Please contact support.');
       return;
