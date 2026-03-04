@@ -317,12 +317,12 @@ export default function NewBookingScreen() {
         : 'Please enter a valid quantity.');
       return;
     }
-    if (!pickupAddress.trim()) {
-      Alert.alert('Missing info', 'Please enter a pickup address.');
+    if (!pickupAddress.trim() || !pickupCoords) {
+      Alert.alert('Missing info', 'Please select a pickup address from the suggestions.');
       return;
     }
-    if (!dropoffAddress.trim()) {
-      Alert.alert('Missing info', 'Please enter a dropoff address.');
+    if (!dropoffAddress.trim() || !dropoffCoords) {
+      Alert.alert('Missing info', 'Please select a dropoff address from the suggestions.');
       return;
     }
     if (!pickupDate || !pickupTime) {
@@ -366,11 +366,11 @@ export default function NewBookingScreen() {
     const bookingInput: CreateBookingInput = {
       route_id: routeId,
       pickup_address: pickupAddress.trim(),
-      pickup_lat: 0,
-      pickup_lng: 0,
+      pickup_lat: pickupCoords.lat,
+      pickup_lng: pickupCoords.lng,
       dropoff_address: dropoffAddress.trim(),
-      dropoff_lat: 0,
-      dropoff_lng: 0,
+      dropoff_lat: dropoffCoords.lat,
+      dropoff_lng: dropoffCoords.lng,
       pickup_datetime: pickupDatetime,
       dropoff_datetime: dropoffDatetime,
       item_type: itemTypeFull,
@@ -588,23 +588,36 @@ export default function NewBookingScreen() {
           <View className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100">
             <Text className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Addresses</Text>
             <Text className="text-sm text-gray-600 mb-1">Pickup Address</Text>
-            <TextInput
-              className={`bg-gray-50 border rounded-lg px-3 py-3 text-base text-gray-900 mb-3 ${errors.pickup_address ? 'border-red-400' : 'border-gray-200'}`}
-              placeholder="e.g. 123 Main St, Gold Coast QLD"
-              placeholderTextColor="#9ca3af"
-              value={pickupAddress}
-              onChangeText={(v) => { setPickupAddress(v); if (errors.pickup_address) setErrors((p) => { const n = { ...p }; delete n.pickup_address; return n; }); }}
-            />
-            {errors.pickup_address && <Text className="text-red-500 text-xs mb-2">{errors.pickup_address}</Text>}
+            <View style={{ zIndex: 2 }}>
+              <PlacesAutocompleteInput
+                placeholder="e.g. 123 Main St, Gold Coast QLD"
+                onSelect={(address, lat, lng) => {
+                  setPickupAddress(address);
+                  setPickupCoords({ lat, lng });
+                  if (errors.pickup_address) setErrors((p) => { const n = { ...p }; delete n.pickup_address; return n; });
+                }}
+                onTextChange={() => {
+                  setPickupCoords(null);
+                }}
+                error={errors.pickup_address}
+              />
+            </View>
+            <View style={{ height: 12 }} />
             <Text className="text-sm text-gray-600 mb-1">Dropoff Address</Text>
-            <TextInput
-              className={`bg-gray-50 border rounded-lg px-3 py-3 text-base text-gray-900 ${errors.dropoff_address ? 'border-red-400' : 'border-gray-200'}`}
-              placeholder="e.g. 456 George St, Sydney NSW"
-              placeholderTextColor="#9ca3af"
-              value={dropoffAddress}
-              onChangeText={(v) => { setDropoffAddress(v); if (errors.dropoff_address) setErrors((p) => { const n = { ...p }; delete n.dropoff_address; return n; }); }}
-            />
-            {errors.dropoff_address && <Text className="text-red-500 text-xs">{errors.dropoff_address}</Text>}
+            <View style={{ zIndex: 1 }}>
+              <PlacesAutocompleteInput
+                placeholder="e.g. 456 George St, Sydney NSW"
+                onSelect={(address, lat, lng) => {
+                  setDropoffAddress(address);
+                  setDropoffCoords({ lat, lng });
+                  if (errors.dropoff_address) setErrors((p) => { const n = { ...p }; delete n.dropoff_address; return n; });
+                }}
+                onTextChange={() => {
+                  setDropoffCoords(null);
+                }}
+                error={errors.dropoff_address}
+              />
+            </View>
           </View>
 
           {/* Dimensions & Weight */}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 
 export default function WelcomeScreen() {
@@ -7,9 +7,14 @@ export default function WelcomeScreen() {
 
   return (
     <View className="flex-1 bg-white justify-center px-6">
-      <View className="mb-12">
+      <View className="mb-12 items-center">
+        <Image
+          source={require('../../assets/logo.png')}
+          className="w-28 h-28 mb-4"
+          resizeMode="contain"
+        />
         <Text className="text-3xl font-bold text-primary-800 text-center">
-          Tasman Transport
+          Tasman Star Seafoods
         </Text>
         <Text className="text-base text-gray-500 text-center mt-2">
           Gold Coast ↔ Sydney Freight
