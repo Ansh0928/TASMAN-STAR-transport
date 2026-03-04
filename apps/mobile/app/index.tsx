@@ -11,7 +11,7 @@ export default function Index() {
     if (loading) return;
 
     if (!session) {
-      router.replace('/(auth)/login');
+      router.replace('/(auth)/welcome');
       return;
     }
 
@@ -26,7 +26,7 @@ export default function Index() {
         router.replace('/(admin)/dashboard');
         break;
       default:
-        router.replace('/(auth)/login');
+        router.replace('/(auth)/welcome');
     }
   }, [loading, session, role]);
 

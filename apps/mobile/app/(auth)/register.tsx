@@ -1,11 +1,35 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { Link } from 'expo-router';
+import { View, Text, TextInput, Alert, KeyboardAvoidingView, Platform, ScrollView, Pressable } from 'react-native';
+import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../../src/providers/AuthProvider';
 import { registerSchema } from '@tasman-transport/shared';
 
+const roleConfig = {
+  customer: {
+    title: 'Create Customer Account',
+    subtitle: 'Start booking freight deliveries',
+    icon: '📦',
+    accentBg: 'bg-blue-600',
+    accentText: 'text-blue-600',
+  },
+  driver: {
+    title: 'Create Driver Account',
+    subtitle: 'Join our delivery team',
+    icon: '🚛',
+    accentBg: 'bg-emerald-600',
+    accentText: 'text-emerald-600',
+  },
+} as const;
+
+type RoleKey = keyof typeof roleConfig;
+
 export default function RegisterScreen() {
   const { signUp } = useAuth();
+  const router = useRouter();
+  const params = useLocalSearchParams<{ role?: string }>();
+  const role: RoleKey = params.role === 'driver' ? 'driver' : 'customer';
+  const config = roleConfig[role];
+
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -21,8 +45,10 @@ export default function RegisterScreen() {
 
     setLoading(true);
     try {
-      await signUp(email, password, fullName, phone || undefined);
-      Alert.alert('Success', 'Account created! You can now sign in.');
+      await signUp(email, password, fullName, phone || undefined, role);
+      Alert.alert('Success', 'Account created! You can now sign in.', [
+        { text: 'OK', onPress: () => router.replace(`/(auth)/login?role=${role}`) },
+      ]);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Registration failed';
       Alert.alert('Registration Error', message);
@@ -37,12 +63,24 @@ export default function RegisterScreen() {
       className="flex-1 bg-white"
     >
       <ScrollView contentContainerClassName="flex-1 justify-center px-6">
-        <View className="mb-10">
+        {/* Back */}
+        <Pressable
+          className="absolute top-14 left-0"
+          onPress={() => router.back()}
+          role="button"
+        >
+          <Text className="text-gray-500 text-base">← Back</Text>
+        </Pressable>
+
+        <View className="items-center mb-10">
+          <View className={`w-20 h-20 rounded-full ${config.accentBg} items-center justify-center mb-4`}>
+            <Text className="text-3xl">{config.icon}</Text>
+          </View>
           <Text className="text-3xl font-bold text-primary-800 text-center">
-            Create Account
+            {config.title}
           </Text>
           <Text className="text-base text-gray-500 text-center mt-2">
-            Join Tasman Transport
+            {config.subtitle}
           </Text>
         </View>
 
@@ -72,7 +110,9 @@ export default function RegisterScreen() {
           </View>
 
           <View className="mt-4">
-            <Text className="text-sm font-medium text-gray-700 mb-1">Phone (optional)</Text>
+            <Text className="text-sm font-medium text-gray-700 mb-1">
+              Phone {role === 'driver' ? '(required)' : '(optional)'}
+            </Text>
             <TextInput
               className="border border-gray-300 rounded-lg px-4 py-3 text-base"
               placeholder="04XX XXX XXX"
@@ -83,6 +123,14 @@ export default function RegisterScreen() {
             />
           </View>
 
+          {role === 'driver' && (
+            <View className="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-3">
+              <Text className="text-amber-800 text-xs text-center">
+                Driver accounts require admin approval before you can start accepting jobs.
+              </Text>
+            </View>
+          )}
+
           <View className="mt-4">
             <Text className="text-sm font-medium text-gray-700 mb-1">Password</Text>
             <TextInput
@@ -92,26 +140,29 @@ export default function RegisterScreen() {
               onChangeText={setPassword}
               secureTextEntry
               autoComplete="new-password"
+              onSubmitEditing={handleRegister}
+              returnKeyType="go"
             />
           </View>
 
-          <TouchableOpacity
-            className={`bg-primary-600 rounded-lg py-3.5 mt-6 ${loading ? 'opacity-50' : ''}`}
+          <Pressable
+            className={`${config.accentBg} rounded-lg py-3.5 mt-6 ${loading ? 'opacity-50' : ''}`}
             onPress={handleRegister}
             disabled={loading}
+            role="button"
           >
             <Text className="text-white text-center text-base font-semibold">
               {loading ? 'Creating account...' : 'Create Account'}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         <View className="mt-6 flex-row justify-center">
           <Text className="text-gray-500">Already have an account? </Text>
-          <Link href="/(auth)/login" asChild>
-            <TouchableOpacity>
-              <Text className="text-primary-600 font-semibold">Sign In</Text>
-            </TouchableOpacity>
+          <Link href={`/(auth)/login?role=${role}`} asChild>
+            <Pressable role="link">
+              <Text className={`${config.accentText} font-semibold`}>Sign In</Text>
+            </Pressable>
           </Link>
         </View>
       </ScrollView>

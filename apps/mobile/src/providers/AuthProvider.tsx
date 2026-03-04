@@ -10,7 +10,7 @@ interface AuthContextType {
   role: UserRole | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string, phone?: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string, phone?: string, role?: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -65,12 +65,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) throw error;
   }
 
-  async function signUp(email: string, password: string, fullName: string, phone?: string) {
+  async function signUp(email: string, password: string, fullName: string, phone?: string, role?: string) {
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: fullName, phone: phone ?? null },
+        data: { full_name: fullName, phone: phone ?? null, role: role ?? 'customer' },
       },
     });
     if (error) throw error;

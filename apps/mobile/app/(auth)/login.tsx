@@ -1,11 +1,37 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { Link } from 'expo-router';
+import { View, Text, TextInput, Alert, KeyboardAvoidingView, Platform, ScrollView, Pressable } from 'react-native';
+import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../../src/providers/AuthProvider';
 import { loginSchema } from '@tasman-transport/shared';
 
+const roleConfig = {
+  customer: {
+    title: 'Customer Sign In',
+    subtitle: 'Book and track your freight',
+    icon: '📦',
+    accentBg: 'bg-blue-600',
+    accentText: 'text-blue-600',
+    registerLabel: "Don't have an account?",
+  },
+  driver: {
+    title: 'Driver Sign In',
+    subtitle: 'Manage your delivery jobs',
+    icon: '🚛',
+    accentBg: 'bg-emerald-600',
+    accentText: 'text-emerald-600',
+    registerLabel: "Don't have a driver account?",
+  },
+} as const;
+
+type RoleKey = keyof typeof roleConfig;
+
 export default function LoginScreen() {
   const { signIn } = useAuth();
+  const router = useRouter();
+  const params = useLocalSearchParams<{ role?: string }>();
+  const role: RoleKey = params.role === 'driver' ? 'driver' : 'customer';
+  const config = roleConfig[role];
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,6 +46,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await signIn(email, password);
+      router.replace('/');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Login failed';
       Alert.alert('Login Error', message);
@@ -34,12 +61,24 @@ export default function LoginScreen() {
       className="flex-1 bg-white"
     >
       <ScrollView contentContainerClassName="flex-1 justify-center px-6">
-        <View className="mb-10">
+        {/* Back to role selection */}
+        <Pressable
+          className="absolute top-14 left-0"
+          onPress={() => router.back()}
+          role="button"
+        >
+          <Text className="text-gray-500 text-base">← Back</Text>
+        </Pressable>
+
+        <View className="items-center mb-10">
+          <View className={`w-20 h-20 rounded-full ${config.accentBg} items-center justify-center mb-4`}>
+            <Text className="text-3xl">{config.icon}</Text>
+          </View>
           <Text className="text-3xl font-bold text-primary-800 text-center">
-            Tasman Transport
+            {config.title}
           </Text>
           <Text className="text-base text-gray-500 text-center mt-2">
-            Gold Coast ↔ Sydney Freight
+            {config.subtitle}
           </Text>
         </View>
 
@@ -66,26 +105,29 @@ export default function LoginScreen() {
               onChangeText={setPassword}
               secureTextEntry
               autoComplete="password"
+              onSubmitEditing={handleLogin}
+              returnKeyType="go"
             />
           </View>
 
-          <TouchableOpacity
-            className={`bg-primary-600 rounded-lg py-3.5 mt-6 ${loading ? 'opacity-50' : ''}`}
+          <Pressable
+            className={`${config.accentBg} rounded-lg py-3.5 mt-6 ${loading ? 'opacity-50' : ''}`}
             onPress={handleLogin}
             disabled={loading}
+            role="button"
           >
             <Text className="text-white text-center text-base font-semibold">
               {loading ? 'Signing in...' : 'Sign In'}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         <View className="mt-6 flex-row justify-center">
-          <Text className="text-gray-500">Don't have an account? </Text>
-          <Link href="/(auth)/register" asChild>
-            <TouchableOpacity>
-              <Text className="text-primary-600 font-semibold">Sign Up</Text>
-            </TouchableOpacity>
+          <Text className="text-gray-500">{config.registerLabel} </Text>
+          <Link href={`/(auth)/register?role=${role}`} asChild>
+            <Pressable role="link">
+              <Text className={`${config.accentText} font-semibold`}>Sign Up</Text>
+            </Pressable>
           </Link>
         </View>
       </ScrollView>

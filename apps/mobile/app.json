@@ -7,7 +7,7 @@
     "icon": "./assets/icon.png",
     "scheme": "tasman-transport",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "backgroundColor": "#1a365d"
     },

@@ -18,5 +18,11 @@
   "devDependencies": {
     "turbo": "^2.3.0",
     "typescript": "~5.3.3"
+  },
+  "dependencies": {
+    "react-native-worklets": "^0.7.4"
+  },
+  "overrides": {
+    "lightningcss": "1.27.0"
   }
 }
