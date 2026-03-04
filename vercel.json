@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build -- --filter=@tasman-transport/web",
-  "installCommand": "npm install",
+  "installCommand": "node -e \"const p=JSON.parse(require('fs').readFileSync('package.json','utf8'));p.overrides.react='18.3.1';p.overrides['react-dom']='18.3.1';require('fs').writeFileSync('package.json',JSON.stringify(p,null,2))\" && npm install --legacy-peer-deps",
   "framework": "nextjs",
   "outputDirectory": "apps/web/.next"
 }

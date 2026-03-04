@@ -1,3 +1,4 @@
+import { decode } from 'base64-arraybuffer';
 import { supabase } from '../lib/supabase';
 import { type PhotoType, type SignatureType } from '@tasman-transport/shared';
 
@@ -57,13 +58,12 @@ export async function uploadSignature(
 ): Promise<string> {
   const fileName = `${bookingId}/${signatureType}_signature_${Date.now()}.png`;
 
-  // Convert base64 to blob via data URI
-  const response = await fetch(`data:image/png;base64,${base64Data}`);
-  const blob = await response.blob();
+  // Convert base64 to ArrayBuffer using base64-arraybuffer (reliable on React Native)
+  const arrayBuffer = decode(base64Data);
 
   const { error } = await supabase.storage
     .from('booking-signatures')
-    .upload(fileName, blob, { contentType: 'image/png' });
+    .upload(fileName, arrayBuffer, { contentType: 'image/png' });
 
   if (error) throw error;
 

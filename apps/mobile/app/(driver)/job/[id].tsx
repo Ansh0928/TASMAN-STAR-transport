@@ -59,7 +59,18 @@ export default function JobDetailScreen() {
   const [signatureBase64, setSignatureBase64] = useState<string | null>(null);
 
   // Track which phase we're capturing for (pickup or delivery)
+  // Initialize based on booking status - if already in_transit or later, we're in delivery phase
   const [photoPhase, setPhotoPhase] = useState<'pickup' | 'delivery'>('pickup');
+
+  // Sync photoPhase when booking loads or status changes
+  useEffect(() => {
+    if (booking) {
+      const deliveryStatuses: string[] = [BOOKING_STATUS.IN_TRANSIT, BOOKING_STATUS.DELIVERED];
+      if (deliveryStatuses.includes(booking.status)) {
+        setPhotoPhase('delivery');
+      }
+    }
+  }, [booking?.status]);
 
   // Fetch booking data
   const fetchBooking = useCallback(async () => {
@@ -88,11 +99,28 @@ export default function JobDetailScreen() {
   // Check for signature result when screen comes back into focus
   useFocusEffect(
     useCallback(() => {
-      if (global.__signatureResult && global.__signatureResult.bookingId === id) {
-        setSignatureBase64(global.__signatureResult.base64);
-        global.__signatureResult = undefined;
+      if (!global.__signatureResult || global.__signatureResult.bookingId !== id) return;
+
+      const result = global.__signatureResult;
+      global.__signatureResult = undefined;
+
+      // Validate the signature type matches current phase
+      const expectedType = booking?.status === 'at_pickup' ? 'pickup' : 'delivery';
+      if (result.signatureType !== expectedType) {
+        console.warn(
+          `Signature type mismatch: got ${result.signatureType}, expected ${expectedType}`
+        );
+        // Still accept it — the upload function uses the correct type based on which
+        // confirm handler is called, not the stored signatureType
       }
-    }, [id])
+
+      if (!result.base64) {
+        console.warn('Received empty signature base64');
+        return;
+      }
+
+      setSignatureBase64(result.base64);
+    }, [id, booking?.status])
   );
 
   // Update booking status
@@ -256,14 +284,8 @@ export default function JobDetailScreen() {
       // Upload delivery signature
       await uploadSignature(booking.id, 'delivery', signatureBase64, user.id);
 
-      // Transition to delivered
-      const { error } = await supabase
-        .from('bookings')
-        .update({ status: BOOKING_STATUS.DELIVERED })
-        .eq('id', booking.id);
-
-      if (error) throw error;
-      setBooking({ ...booking, status: BOOKING_STATUS.DELIVERED });
+      // Transition to delivered (use updateStatus for consistent validation)
+      await updateStatus(BOOKING_STATUS.DELIVERED);
 
       // Reset capture state
       setCapturedPhotos([]);

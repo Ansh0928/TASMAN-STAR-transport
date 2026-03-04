@@ -12,6 +12,23 @@ export default function SignatureScreen() {
   const signaturePadRef = useRef<SignaturePadRef>(null);
   const [capturing, setCapturing] = useState(false);
 
+  // Guard against missing params
+  if (!bookingId || !signatureType) {
+    return (
+      <View className="flex-1 bg-white items-center justify-center px-4">
+        <Text className="text-red-500 text-base text-center mb-4">
+          Missing booking information. Please go back and try again.
+        </Text>
+        <TouchableOpacity
+          className="bg-[#1e3a5f] rounded-xl px-6 py-3"
+          onPress={() => router.back()}
+        >
+          <Text className="text-white font-semibold">Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   const handleClear = () => {
     signaturePadRef.current?.clear();
   };
@@ -29,11 +46,10 @@ export default function SignatureScreen() {
       return;
     }
 
-    // Navigate back with the signature data via global state
-    // We store the signature in a module-level variable that the job detail screen can read
+    // Store signature in global state for the job detail screen to read on focus
     global.__signatureResult = {
-      bookingId,
-      signatureType,
+      bookingId: bookingId as string,
+      signatureType: signatureType as string,
       base64,
     };
 
