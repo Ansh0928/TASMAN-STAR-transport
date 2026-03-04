@@ -6,7 +6,9 @@
   "types": "./src/index.ts",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
@@ -15,6 +17,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "typescript": "~5.3.3"
+    "typescript": "~5.3.3",
+    "vitest": "^4.0.18"
   }
 }
