@@ -64,7 +64,13 @@ export default function LoginScreen() {
         {/* Back to role selection */}
         <Pressable
           className="absolute top-14 left-0"
-          onPress={() => router.back()}
+          onPress={() => {
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.replace('/(auth)/welcome');
+            }
+          }}
           role="button"
         >
           <Text className="text-gray-500 text-base">← Back</Text>

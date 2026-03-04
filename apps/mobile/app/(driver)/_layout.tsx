@@ -8,7 +8,7 @@ export default function DriverLayout() {
   const { role, loading } = useAuth();
 
   if (loading) return <LoadingScreen />;
-  if (role !== 'driver') return <Redirect href="/(auth)/login" />;
+  if (role !== 'driver') return <Redirect href="/(auth)/welcome" />;
 
   return (
     <Tabs

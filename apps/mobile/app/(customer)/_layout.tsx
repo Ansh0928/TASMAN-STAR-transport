@@ -8,7 +8,7 @@ export default function CustomerLayout() {
   const { role, loading } = useAuth();
 
   if (loading) return <LoadingScreen />;
-  if (role !== 'customer') return <Redirect href="/(auth)/login" />;
+  if (role !== 'customer') return <Redirect href="/(auth)/welcome" />;
 
   return (
     <Tabs
